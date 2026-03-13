@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Catálogos Digitales — Tu tienda siempre abierta</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>Catálogos Digitales — Próximamente</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
     --azul:    #1B3F6E;
@@ -16,359 +16,97 @@
     --fondo:   #FAF7F2;
     --texto:   #1A1A1A;
     --gris:    #6B6B6B;
-    --borde:   #E8E3DB;
   }
-
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-
   body {
     font-family: 'Outfit', sans-serif;
     background: var(--fondo);
     color: var(--texto);
-    overflow-x: hidden;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
   }
 
   .top-bar {
-    height: 5px;
+    position: fixed; top: 0; left: 0; right: 0; height: 5px;
     background: linear-gradient(to right,
       var(--azul) 0 16.6%, var(--naranja) 16.6% 33.2%,
       var(--morado) 33.2% 49.8%, var(--cielo) 49.8% 66.4%,
       var(--rosa) 66.4% 83%, var(--rojo) 83% 100%);
-    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
   }
 
-  nav {
-    position: fixed; top: 5px; left: 0; right: 0; z-index: 199;
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 1.1rem 3rem;
-    background: rgba(250,247,242,0.92);
-    backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--borde);
+  .dots {
+    display: flex; gap: 10px; justify-content: center;
+    margin-bottom: 2.5rem;
+    animation: fadeUp 0.8s ease both;
+  }
+  .dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    animation: bounce 2s ease-in-out infinite;
+  }
+  .dot:nth-child(1) { background: var(--azul);    animation-delay: 0s; }
+  .dot:nth-child(2) { background: var(--naranja);  animation-delay: 0.15s; }
+  .dot:nth-child(3) { background: var(--morado);   animation-delay: 0.3s; }
+  .dot:nth-child(4) { background: var(--cielo);    animation-delay: 0.45s; }
+  .dot:nth-child(5) { background: var(--rosa);     animation-delay: 0.6s; }
+  .dot:nth-child(6) { background: var(--rojo);     animation-delay: 0.75s; }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
   }
 
-  .nav-logo {
+  .logo {
     font-family: 'Playfair Display', serif;
-    font-weight: 900; font-size: 1.15rem;
-    color: var(--texto); letter-spacing: -0.02em;
+    font-weight: 900; font-size: 1.3rem;
+    margin-bottom: 2rem;
+    animation: fadeUp 0.8s 0.1s ease both;
   }
-  .nav-logo em { font-style: normal; color: var(--naranja); }
+  .logo em { font-style: normal; color: var(--naranja); }
 
-  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
-  .nav-links a {
-    font-size: 0.88rem; font-weight: 500;
-    color: var(--gris); text-decoration: none; transition: color 0.2s;
-  }
-  .nav-links a:hover { color: var(--texto); }
-
-  .nav-cta {
-    background: var(--texto); color: var(--fondo) !important;
-    padding: 0.55rem 1.3rem; border-radius: 100px;
-    font-weight: 600 !important; font-size: 0.85rem !important;
-    transition: background 0.2s !important;
-  }
-  .nav-cta:hover { background: var(--naranja) !important; color: #fff !important; }
-
-  /* HERO */
-  .hero {
-    min-height: 100vh;
-    display: grid; grid-template-columns: 1fr 1fr;
-    align-items: center;
-    padding: 8rem 3rem 4rem;
-    max-width: 1200px; margin: 0 auto; gap: 4rem;
-  }
-
-  .hero-left { animation: fadeLeft 0.9s ease both; }
-
-  .hero-tag {
-    display: inline-flex; align-items: center; gap: 0.5rem;
-    font-size: 0.78rem; font-weight: 600; letter-spacing: 0.12em;
-    text-transform: uppercase; color: var(--naranja); margin-bottom: 1.5rem;
-  }
-  .hero-tag::before {
-    content: ''; display: block; width: 28px; height: 2px; background: var(--naranja);
-  }
-
-  .hero h1 {
+  h1 {
     font-family: 'Playfair Display', serif;
-    font-weight: 900; font-size: clamp(3.2rem, 5vw, 5.5rem);
-    line-height: 1.0; letter-spacing: -0.03em; margin-bottom: 1.5rem;
+    font-weight: 900; font-size: clamp(2.5rem, 8vw, 5rem);
+    letter-spacing: -0.04em; line-height: 1;
+    margin-bottom: 1.2rem;
+    animation: fadeUp 0.8s 0.2s ease both;
   }
-  .hero h1 .accent { display: block; color: var(--naranja); font-style: italic; }
+  h1 em { font-style: italic; color: var(--naranja); }
 
-  .hero-desc {
-    font-size: 1.05rem; color: var(--gris); line-height: 1.75;
-    max-width: 440px; margin-bottom: 2.5rem; font-weight: 300;
-  }
-
-  .hero-buttons { display: flex; gap: 1rem; flex-wrap: wrap; }
-
-  .btn-dark {
-    background: var(--texto); color: var(--fondo);
-    font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 0.95rem;
-    padding: 0.85rem 2rem; border-radius: 100px; text-decoration: none;
-    transition: background 0.2s, transform 0.2s;
-    display: inline-flex; align-items: center; gap: 0.5rem;
-  }
-  .btn-dark:hover { background: var(--naranja); transform: translateY(-2px); }
-
-  .btn-ghost {
-    background: transparent; color: var(--texto);
-    font-family: 'Outfit', sans-serif; font-weight: 500; font-size: 0.95rem;
-    padding: 0.85rem 2rem; border-radius: 100px;
-    border: 1.5px solid var(--borde); text-decoration: none;
-    transition: border-color 0.2s, transform 0.2s;
-    display: inline-flex; align-items: center; gap: 0.5rem;
-  }
-  .btn-ghost:hover { border-color: var(--texto); transform: translateY(-2px); }
-
-  .hero-stats {
-    display: flex; gap: 2rem; margin-top: 3rem;
-    padding-top: 2rem; border-top: 1px solid var(--borde);
-  }
-  .stat-num {
-    font-family: 'Playfair Display', serif;
-    font-size: 2rem; font-weight: 900; color: var(--texto);
-  }
-  .stat-label { font-size: 0.78rem; color: var(--gris); font-weight: 400; margin-top: 0.1rem; }
-
-  .hero-right { animation: fadeRight 0.9s 0.2s ease both; position: relative; }
-
-  .mockup-outer {
-    background: #fff; border-radius: 24px;
-    border: 1px solid var(--borde);
-    box-shadow: 0 32px 80px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.04);
-    overflow: hidden;
+  p {
+    font-size: 1rem; color: var(--gris); font-weight: 300;
+    line-height: 1.7; max-width: 400px;
+    margin-bottom: 2.5rem;
+    animation: fadeUp 0.8s 0.3s ease both;
   }
 
-  .mockup-header {
-    background: var(--texto); padding: 0.9rem 1.2rem;
-    display: flex; align-items: center; gap: 0.8rem;
-  }
-  .m-dot { width: 10px; height: 10px; border-radius: 50%; }
-  .m-url {
-    flex: 1; background: rgba(255,255,255,0.1); border-radius: 6px;
-    padding: 0.3rem 0.8rem; font-size: 0.72rem; color: rgba(255,255,255,0.5);
-  }
-
-  .mockup-body { padding: 1.2rem; }
-  .mockup-cats { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
-  .cat-pill { font-size: 0.7rem; font-weight: 600; padding: 0.25rem 0.7rem; border-radius: 100px; color: #fff; }
-
-  .mockup-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.7rem; }
-  .m-card { border-radius: 12px; overflow: hidden; border: 1px solid #F0EDE8; }
-  .m-img { height: 90px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; }
-  .m-info { padding: 0.6rem; }
-  .m-sku { font-size: 0.6rem; color: #aaa; margin-bottom: 0.2rem; }
-  .m-name { font-size: 0.72rem; font-weight: 600; margin-bottom: 0.3rem; color: var(--texto); }
-  .m-price { font-size: 0.75rem; font-weight: 700; }
-
-  .mockup-footer {
-    margin-top: 1rem; padding: 0.8rem 1rem;
-    background: #F9F7F4; border-radius: 12px;
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  .m-cart-label { font-size: 0.78rem; font-weight: 600; }
-  .m-wsp { background: #25D366; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 0.35rem 0.9rem; border-radius: 100px; }
-
-  .hero-float {
-    position: absolute; top: -16px; right: -16px;
-    background: var(--naranja); color: #fff;
-    font-family: 'Playfair Display', serif; font-weight: 700; font-size: 0.8rem;
-    padding: 0.7rem 1rem; border-radius: 14px;
-    box-shadow: 0 8px 24px rgba(242,101,34,0.35);
-    text-align: center; line-height: 1.3;
-  }
-
-  @keyframes fadeLeft {
-    from { opacity: 0; transform: translateX(-30px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
-  @keyframes fadeRight {
-    from { opacity: 0; transform: translateX(30px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
-
-  /* FAMILY BAND */
-  .family-band {
-    background: var(--texto); padding: 2.5rem 3rem;
-    display: flex; align-items: center; justify-content: center;
-    gap: 1.5rem; flex-wrap: wrap;
-  }
-  .family-label {
-    color: rgba(255,255,255,0.4); font-size: 0.78rem;
-    font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; margin-right: 1rem;
-  }
-  .family-chip { display: flex; align-items: center; gap: 0.5rem; color: #fff; font-size: 0.82rem; font-weight: 500; }
-  .chip-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
-
-  /* SECTIONS */
-  .section { padding: 7rem 3rem; max-width: 1200px; margin: 0 auto; }
-
-  .tag-line {
-    font-size: 0.75rem; font-weight: 600; letter-spacing: 0.14em;
-    text-transform: uppercase; color: var(--naranja); margin-bottom: 1rem;
-  }
-
-  .section-title {
-    font-family: 'Playfair Display', serif;
-    font-weight: 900; font-size: clamp(2.2rem, 3.5vw, 3.5rem);
-    letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 1.2rem;
-  }
-
-  .section-sub {
-    color: var(--gris); font-size: 1rem; line-height: 1.75;
-    font-weight: 300; max-width: 500px;
-  }
-
-  /* FEATURES */
-  .features-grid {
-    display: grid; grid-template-columns: repeat(4, 1fr);
-    gap: 1px; background: var(--borde);
-    border: 1px solid var(--borde); border-radius: 20px;
-    overflow: hidden; margin-top: 4rem;
-  }
-
-  .feat { background: var(--fondo); padding: 2rem 1.8rem; transition: background 0.2s; }
-  .feat:hover { background: #fff; }
-  .feat-icon { font-size: 1.6rem; margin-bottom: 1rem; }
-  .feat-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.5rem; }
-  .feat-desc { font-size: 0.83rem; color: var(--gris); line-height: 1.6; font-weight: 300; }
-
-  /* CLIENTES */
-  .clientes-section { padding: 7rem 3rem; background: var(--texto); }
-  .clientes-inner { max-width: 1200px; margin: 0 auto; }
-  .clientes-section .section-title { color: #fff; }
-  .clientes-section .tag-line { color: var(--cielo); }
-  .clientes-section .section-sub { color: rgba(255,255,255,0.45); }
-
-  .clientes-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1.2rem; margin-top: 3.5rem;
-  }
-
-  .cliente-card {
-    border-radius: 16px; padding: 1.8rem; text-decoration: none; color: #fff;
-    border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04);
-    transition: background 0.2s, transform 0.2s; display: block;
-  }
-  .cliente-card:hover { background: rgba(255,255,255,0.08); transform: translateY(-4px); }
-  .cliente-card.active { border-color: var(--naranja); }
-
-  .cliente-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.2rem; }
-  .cliente-emoji { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
-  .cliente-status { font-size: 0.68rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 100px; }
-  .cliente-nombre { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.2rem; margin-bottom: 0.3rem; }
-  .cliente-url { font-size: 0.75rem; color: rgba(255,255,255,0.3); }
-  .cliente-desc { font-size: 0.82rem; color: rgba(255,255,255,0.45); margin-top: 0.8rem; line-height: 1.5; font-weight: 300; }
-
-  /* PLANES */
-  .planes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 4rem; }
-
-  .plan {
-    border-radius: 20px; padding: 2.5rem;
-    border: 1.5px solid var(--borde); background: #fff;
-    position: relative; transition: transform 0.2s, box-shadow 0.2s;
-  }
-  .plan:hover { transform: translateY(-6px); box-shadow: 0 24px 60px rgba(0,0,0,0.07); }
-  .plan.highlight { background: var(--texto); border-color: var(--texto); color: #fff; }
-
-  .plan-top-tag {
-    position: absolute; top: -14px; left: 2rem;
-    background: var(--naranja); color: #fff;
-    font-size: 0.7rem; font-weight: 700;
-    padding: 0.25rem 0.9rem; border-radius: 100px;
-    letter-spacing: 0.08em; text-transform: uppercase;
-  }
-
-  .plan-name { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 900; margin-bottom: 0.3rem; }
-  .plan-tagline { font-size: 0.82rem; font-weight: 300; margin-bottom: 1.5rem; }
-  .plan.highlight .plan-tagline { color: rgba(255,255,255,0.5); }
-  .plan:not(.highlight) .plan-tagline { color: var(--gris); }
-
-  .plan-price { font-family: 'Playfair Display', serif; font-size: 3rem; font-weight: 900; letter-spacing: -0.04em; line-height: 1; }
-  .plan-price sub { font-size: 1rem; font-weight: 400; font-family: 'Outfit', sans-serif; vertical-align: baseline; }
-  .plan-price sup { font-size: 1.2rem; font-family: 'Outfit', sans-serif; }
-
-  .plan-setup { font-size: 0.78rem; margin-top: 0.4rem; margin-bottom: 1.5rem; padding-bottom: 1.5rem; }
-  .plan.highlight .plan-setup { color: rgba(255,255,255,0.4); border-bottom: 1px solid rgba(255,255,255,0.1); }
-  .plan:not(.highlight) .plan-setup { color: var(--gris); border-bottom: 1px solid var(--borde); }
-
-  .plan-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 2rem; }
-  .plan-list li { font-size: 0.88rem; font-weight: 400; display: flex; align-items: center; gap: 0.6rem; }
-  .plan.highlight .plan-list li { color: rgba(255,255,255,0.8); }
-  .plan-list li::before { content: '→'; font-weight: 700; flex-shrink: 0; }
-  .plan.highlight .plan-list li::before { color: var(--naranja); }
-  .plan:not(.highlight) .plan-list li::before { color: var(--cielo); }
-
-  .plan-cta {
-    display: block; text-align: center; padding: 0.85rem; border-radius: 100px;
-    font-weight: 600; font-size: 0.9rem; text-decoration: none;
-    transition: opacity 0.2s, transform 0.2s;
-  }
-  .plan-cta:hover { opacity: 0.85; transform: translateY(-1px); }
-  .plan.highlight .plan-cta { background: var(--naranja); color: #fff; }
-  .plan:not(.highlight) .plan-cta { background: var(--fondo); color: var(--texto); border: 1.5px solid var(--borde); }
-
-  /* CTA FINAL */
-  .cta-final {
-    padding: 8rem 3rem; text-align: center; position: relative; overflow: hidden;
-  }
-  .cta-final::before {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(135deg, rgba(242,101,34,0.06) 0%, transparent 50%, rgba(56,168,224,0.06) 100%);
-    pointer-events: none;
-  }
-  .cta-final h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(2.5rem, 5vw, 5rem); font-weight: 900;
-    letter-spacing: -0.04em; line-height: 1; margin-bottom: 1.5rem; position: relative;
-  }
-  .cta-final h2 em { font-style: italic; color: var(--naranja); }
-  .cta-final p { color: var(--gris); font-size: 1.05rem; margin-bottom: 3rem; font-weight: 300; position: relative; }
-
-  .wsp-btn {
-    display: inline-flex; align-items: center; gap: 0.8rem;
+  .wsp {
+    display: inline-flex; align-items: center; gap: 0.6rem;
     background: #25D366; color: #fff;
-    font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1.05rem;
-    padding: 1.1rem 2.5rem; border-radius: 100px; text-decoration: none;
+    font-weight: 600; font-size: 0.95rem;
+    padding: 0.85rem 2rem; border-radius: 100px;
+    text-decoration: none;
     transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 12px 40px rgba(37,211,102,0.25); position: relative;
+    box-shadow: 0 8px 30px rgba(37,211,102,0.25);
+    animation: fadeUp 0.8s 0.4s ease both;
   }
-  .wsp-btn:hover { transform: translateY(-3px); box-shadow: 0 20px 60px rgba(37,211,102,0.35); }
-
-  footer {
-    background: var(--texto); color: rgba(255,255,255,0.35);
-    padding: 2.5rem 3rem;
-    display: flex; justify-content: space-between; align-items: center;
-    flex-wrap: wrap; gap: 1rem; font-size: 0.82rem;
-  }
-  footer strong { color: rgba(255,255,255,0.7); }
-  .footer-dots { display: flex; gap: 6px; }
-  .footer-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .wsp:hover { transform: translateY(-2px); box-shadow: 0 14px 40px rgba(37,211,102,0.35); }
 
   .bottom-bar {
-    height: 5px;
+    position: fixed; bottom: 0; left: 0; right: 0; height: 5px;
     background: linear-gradient(to right,
       var(--azul) 0 16.6%, var(--naranja) 16.6% 33.2%,
       var(--morado) 33.2% 49.8%, var(--cielo) 49.8% 66.4%,
       var(--rosa) 66.4% 83%, var(--rojo) 83% 100%);
   }
 
-  @media (max-width: 900px) {
-    .hero { grid-template-columns: 1fr; padding: 7rem 1.5rem 3rem; gap: 3rem; }
-    .hero-right { display: none; }
-    .features-grid { grid-template-columns: repeat(2, 1fr); }
-    .planes-grid { grid-template-columns: 1fr; }
-    nav { padding: 1rem 1.5rem; }
-    .nav-links { display: none; }
-    .section { padding: 5rem 1.5rem; }
-    .clientes-section { padding: 5rem 1.5rem; }
-    footer { flex-direction: column; text-align: center; }
-    .family-band { padding: 2rem 1.5rem; gap: 1rem; }
-  }
-  @media (max-width: 600px) {
-    .features-grid { grid-template-columns: 1fr; border-radius: 16px; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 </style>
 </head>
@@ -376,234 +114,26 @@
 
 <div class="top-bar"></div>
 
-<nav>
-  <div class="nav-logo">Catálogos<em>Digitales</em></div>
-  <ul class="nav-links">
-    <li><a href="#features">Funciones</a></li>
-    <li><a href="#clientes">Clientes</a></li>
-    <li><a href="#planes">Planes</a></li>
-    <li><a href="#contacto" class="nav-cta">Solicitar demo</a></li>
-  </ul>
-</nav>
-
-<section style="padding-top: 5px;">
-  <div class="hero">
-    <div class="hero-left">
-      <div class="hero-tag">Catálogos digitales con carrito</div>
-      <h1>Tu negocio,<br><span class="accent">siempre abierto.</span></h1>
-      <p class="hero-desc">Vende más con un catálogo profesional en tu propio dominio. Precios personalizados por cliente, carrito sincronizado y pedidos directo a WhatsApp.</p>
-      <div class="hero-buttons">
-        <a href="#contacto" class="btn-dark">Quiero el mío →</a>
-        <a href="/mtlider" class="btn-ghost">Ver ejemplo real ↗</a>
-      </div>
-      <div class="hero-stats">
-        <div>
-          <div class="stat-num">48h</div>
-          <div class="stat-label">Para tener tu catálogo listo</div>
-        </div>
-        <div>
-          <div class="stat-num">4</div>
-          <div class="stat-label">Listas de precios por cliente</div>
-        </div>
-        <div>
-          <div class="stat-num">100%</div>
-          <div class="stat-label">Sin app, abre desde el celular</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="hero-right">
-      <div class="hero-float">✦ En vivo ahora<br>MTLider</div>
-      <div class="mockup-outer">
-        <div class="mockup-header">
-          <div class="m-dot" style="background:#D93025"></div>
-          <div class="m-dot" style="background:#F26522"></div>
-          <div class="m-dot" style="background:#25D366"></div>
-          <div class="m-url">catalogosdigitales.mx/tuempresa</div>
-        </div>
-        <div class="mockup-body">
-          <div class="mockup-cats">
-            <span class="cat-pill" style="background:var(--azul)">Todos</span>
-            <span class="cat-pill" style="background:var(--naranja)">Fundas</span>
-            <span class="cat-pill" style="background:var(--morado)">Vidrios</span>
-            <span class="cat-pill" style="background:var(--cielo)">Cargadores</span>
-          </div>
-          <div class="mockup-grid">
-            <div class="m-card">
-              <div class="m-img" style="background:#FEF3EC;">📱</div>
-              <div class="m-info">
-                <div class="m-sku">SKU-001</div>
-                <div class="m-name">Funda Premium</div>
-                <div class="m-price" style="color:var(--naranja)">$189</div>
-              </div>
-            </div>
-            <div class="m-card">
-              <div class="m-img" style="background:#EFF6FF;">🔒</div>
-              <div class="m-info">
-                <div class="m-sku">SKU-002</div>
-                <div class="m-name">Vidrio 9H</div>
-                <div class="m-price" style="color:var(--azul)">$99</div>
-              </div>
-            </div>
-            <div class="m-card">
-              <div class="m-img" style="background:#F5F0FF;">⚡</div>
-              <div class="m-info">
-                <div class="m-sku">SKU-003</div>
-                <div class="m-name">Cargador 65W</div>
-                <div class="m-price" style="color:var(--morado)">$349</div>
-              </div>
-            </div>
-          </div>
-          <div class="mockup-footer">
-            <div class="m-cart-label">🛒 3 productos · $637</div>
-            <div class="m-wsp">Pedir por WhatsApp</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="family-band">
-  <span class="family-label">Hecho con ❤️ por la familia</span>
-  <div class="family-chip"><div class="chip-dot" style="background:var(--azul)"></div> Azul marino</div>
-  <div class="family-chip"><div class="chip-dot" style="background:var(--naranja)"></div> Naranja</div>
-  <div class="family-chip"><div class="chip-dot" style="background:var(--morado)"></div> Morado</div>
-  <div class="family-chip"><div class="chip-dot" style="background:var(--cielo)"></div> Azul cielo</div>
-  <div class="family-chip"><div class="chip-dot" style="background:var(--rosa)"></div> Rosa</div>
-  <div class="family-chip"><div class="chip-dot" style="background:var(--rojo)"></div> Rojo</div>
+<div class="dots">
+  <div class="dot"></div>
+  <div class="dot"></div>
+  <div class="dot"></div>
+  <div class="dot"></div>
+  <div class="dot"></div>
+  <div class="dot"></div>
 </div>
 
-<section id="features" class="section">
-  <div class="tag-line">¿Qué incluye?</div>
-  <div class="section-title">Todo para vender,<br>nada que sobra.</div>
-  <p class="section-sub">Cada catálogo viene completo. Sin plugins, sin extras, sin sorpresas.</p>
-  <div class="features-grid">
-    <div class="feat"><div class="feat-icon">💰</div><div class="feat-title">Precios por lista</div><div class="feat-desc">Mayoreo, menudeo, distribuidor y VIP. Cada cliente ve solo lo que le corresponde.</div></div>
-    <div class="feat"><div class="feat-icon">🛒</div><div class="feat-title">Carrito en la nube</div><div class="feat-desc">Se guarda automáticamente. Tu cliente retoma el pedido desde cualquier dispositivo.</div></div>
-    <div class="feat"><div class="feat-icon">💬</div><div class="feat-title">Pedidos a WhatsApp</div><div class="feat-desc">El pedido llega al WhatsApp del vendedor con todos los detalles listos para confirmar.</div></div>
-    <div class="feat"><div class="feat-icon">📸</div><div class="feat-title">Fotos y video</div><div class="feat-desc">Hasta 3 fotos por producto y video de YouTube en el modal de detalle.</div></div>
-    <div class="feat"><div class="feat-icon">🔍</div><div class="feat-title">Búsqueda instantánea</div><div class="feat-desc">Encuentra cualquier producto al instante por nombre, SKU o categoría.</div></div>
-    <div class="feat"><div class="feat-icon">🎨</div><div class="feat-title">Variantes por modelo</div><div class="feat-desc">Ideal para fundas o tallas: cada variante con su stock y precio individual.</div></div>
-    <div class="feat"><div class="feat-icon">📊</div><div class="feat-title">Panel de admin</div><div class="feat-desc">Ve todos los carritos activos y gestiona clientes y vendedores en tiempo real.</div></div>
-    <div class="feat"><div class="feat-icon">⚡</div><div class="feat-title">Carga en &lt;1 segundo</div><div class="feat-desc">Caché inteligente para que tu catálogo responda al instante desde la segunda visita.</div></div>
-  </div>
-</section>
+<div class="logo">Catálogos<em>Digitales</em></div>
 
-<section id="clientes" class="clientes-section">
-  <div class="clientes-inner">
-    <div class="tag-line">Catálogos activos</div>
-    <div class="section-title">Empresas que ya<br>venden con nosotros.</div>
-    <p class="section-sub">Cada empresa, su propia URL, sus productos, sus precios.</p>
-    <div class="clientes-grid">
-      <a href="/mtlider" class="cliente-card active">
-        <div class="cliente-top">
-          <div class="cliente-emoji" style="background:rgba(242,101,34,0.15)">🛡️</div>
-          <span class="cliente-status" style="background:rgba(37,211,102,0.15);color:#25D366">● En vivo</span>
-        </div>
-        <div class="cliente-nombre">MTLider</div>
-        <div class="cliente-url">catalogosdigitales.mx/mtlider</div>
-        <div class="cliente-desc">Protección para smartphones. Fundas, vidrios y accesorios con variantes por modelo.</div>
-      </a>
-      <div class="cliente-card" style="cursor:default">
-        <div class="cliente-top">
-          <div class="cliente-emoji" style="background:rgba(56,168,224,0.15)">⚾</div>
-          <span class="cliente-status" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.35)">Próximamente</span>
-        </div>
-        <div class="cliente-nombre">Beisbolandia</div>
-        <div class="cliente-url">catalogosdigitales.mx/beisbolandia</div>
-        <div class="cliente-desc">Tienda deportiva especializada en béisbol con equipamiento y uniformes.</div>
-      </div>
-      <div class="cliente-card" style="cursor:default; border-style:dashed;">
-        <div class="cliente-top">
-          <div class="cliente-emoji" style="background:rgba(123,47,190,0.15)">🏪</div>
-          <span class="cliente-status" style="background:rgba(242,101,34,0.15);color:var(--naranja)">Disponible</span>
-        </div>
-        <div class="cliente-nombre">Tu empresa aquí</div>
-        <div class="cliente-url">catalogosdigitales.mx/tuempresa</div>
-        <div class="cliente-desc">¿Quieres ser el siguiente? Tu catálogo profesional listo en 48 horas.</div>
-      </div>
-    </div>
-  </div>
-</section>
+<h1>Algo <em>increíble</em><br>está en camino.</h1>
 
-<section id="planes" class="section">
-  <div class="tag-line">Inversión</div>
-  <div class="section-title">Sin letra chica.<br>Sin sorpresas.</div>
-  <p class="section-sub">Mensualidad fija todo incluido. Sin contratos largos.</p>
-  <div class="planes-grid">
-    <div class="plan">
-      <div class="plan-name">Básico</div>
-      <div class="plan-tagline">Para negocios que arrancan</div>
-      <div class="plan-price"><sup>$</sup>2,500<sub>/mes</sub></div>
-      <div class="plan-setup">+ $5,000 setup inicial</div>
-      <ul class="plan-list">
-        <li>Hasta 100 productos</li>
-        <li>1 lista de precios</li>
-        <li>Checkout WhatsApp</li>
-        <li>3 fotos por producto</li>
-        <li>Soporte por WhatsApp</li>
-      </ul>
-      <a href="#contacto" class="plan-cta">Empezar →</a>
-    </div>
-    <div class="plan highlight">
-      <div class="plan-top-tag">MÁS POPULAR</div>
-      <div class="plan-name">Estándar</div>
-      <div class="plan-tagline">Para negocios en crecimiento</div>
-      <div class="plan-price"><sup>$</sup>3,500<sub>/mes</sub></div>
-      <div class="plan-setup">+ $6,500 setup inicial</div>
-      <ul class="plan-list">
-        <li>Productos ilimitados</li>
-        <li>4 listas de precios</li>
-        <li>Carrito sincronizado</li>
-        <li>Panel de administración</li>
-        <li>Roles vendedor / admin</li>
-        <li>Variantes por modelo</li>
-        <li>Soporte prioritario</li>
-      </ul>
-      <a href="#contacto" class="plan-cta">Empezar →</a>
-    </div>
-    <div class="plan">
-      <div class="plan-name">Pro</div>
-      <div class="plan-tagline">Para empresas grandes</div>
-      <div class="plan-price"><sup>$</sup>5,000<sub>/mes</sub></div>
-      <div class="plan-setup">+ $8,000 setup inicial</div>
-      <ul class="plan-list">
-        <li>Todo lo del Estándar</li>
-        <li>Dominio personalizado</li>
-        <li>Subida de fotos desde panel</li>
-        <li>Video por producto</li>
-        <li>Exportación Excel de pedidos</li>
-        <li>Soporte dedicado</li>
-      </ul>
-      <a href="#contacto" class="plan-cta">Empezar →</a>
-    </div>
-  </div>
-</section>
+<p>Estamos preparando algo especial para ti. Catálogos digitales profesionales con carrito, precios por cliente y checkout por WhatsApp.</p>
 
-<section id="contacto" class="cta-final">
-  <h2>¿Listo para<br><em>vender más?</em></h2>
-  <p>Escríbenos. Tu catálogo en línea en 48 horas.</p>
-  <a href="https://wa.me/523338493961?text=Hola%2C%20me%20interesa%20un%20cat%C3%A1logo%20digital%20para%20mi%20negocio" class="wsp-btn" target="_blank">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-    Solicitar catálogo por WhatsApp
-  </a>
-</section>
+<a href="https://wa.me/523338493961?text=Hola%2C%20me%20interesa%20un%20cat%C3%A1logo%20digital" class="wsp" target="_blank">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  Avisar cuando esté listo
+</a>
 
-<footer>
-  <div>
-    <strong>Catálogos Digitales</strong> · catalogosdigitales.mx<br>
-    Hecho con ❤️ en Zapopan, Jalisco
-  </div>
-  <div class="footer-dots">
-    <div class="footer-dot" style="background:var(--azul)"></div>
-    <div class="footer-dot" style="background:var(--naranja)"></div>
-    <div class="footer-dot" style="background:var(--morado)"></div>
-    <div class="footer-dot" style="background:var(--cielo)"></div>
-    <div class="footer-dot" style="background:var(--rosa)"></div>
-    <div class="footer-dot" style="background:var(--rojo)"></div>
-  </div>
-</footer>
 <div class="bottom-bar"></div>
 
 </body>
