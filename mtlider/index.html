@@ -523,7 +523,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--ink);transiti
 </div>
 
 <script>
-const API='https://script.google.com/macros/s/AKfycbyI1PDNS8PURSMbrAHv3EbMJ5K0rOC2XxBH8-mMW3dT5Pr8X2EVCz8bhhz-QqKKs7Lh/exec';
+const API='https://script.google.com/macros/s/AKfycbx5CrfCeeYeMsipQ3fOD3aJayiMxxcJGpaPVt80SrQe2bUTJlZbIp4lK-K1Fv168uvm/exec';
 const CLOUDINARY_CLOUD='duh7kxf7z';
 const CLOUDINARY_PRESET='catalogo_mtlider';
 
@@ -550,6 +550,7 @@ async function init(){
     document.getElementById('loading').classList.remove('show');
     if(SESSION){
       if(SESSION.rol==='admin') mostrarAdmin();
+      else if(SESSION.rol==='diseñador') mostrarDiseñador();
       else {cargarCarritoGuardado();mostrarApp();}
     } else document.getElementById('screen-login').classList.add('active');
   }
@@ -565,6 +566,7 @@ async function init(){
       document.getElementById('loading').classList.remove('show');
       if(SESSION){
         if(SESSION.rol==='admin') mostrarAdmin();
+        else if(SESSION.rol==='diseñador') mostrarDiseñador();
         else {cargarCarritoGuardado();mostrarApp();}
       } else document.getElementById('screen-login').classList.add('active');
     } else {
@@ -629,6 +631,8 @@ async function doLogin(){
       mostrarAdmin();
     } else if(SESSION.rol==='vendedor'){
       mostrarAdmin();
+    } else if(SESSION.rol==='diseñador'){
+      mostrarDiseñador();
     } else {
       mostrarBienvenida();
       mostrarApp();
@@ -686,7 +690,21 @@ async function mostrarAdmin(){
   const esVendedor=SESSION.rol==='vendedor';
   document.getElementById('admin-user').textContent='👤 '+SESSION.nombre+(esVendedor?' — Vendedor':'');
   document.getElementById('tab-clientes').style.display=esVendedor?'none':'';
+  document.getElementById('tab-productos').style.display='';
   await cargarCarritosAdmin();
+}
+
+function mostrarDiseñador(){
+  document.getElementById('screen-login').classList.remove('active');
+  document.getElementById('screen-login').classList.add('hidden');
+  document.getElementById('screen-admin').classList.add('active');
+  document.getElementById('admin-user').textContent='🎨 '+SESSION.nombre+' — Diseñador';
+  // Ocultar tabs que no le corresponden
+  document.getElementById('tab-carritos').style.display='none';
+  document.getElementById('tab-clientes').style.display='none';
+  document.getElementById('tab-productos').style.display='';
+  // Ir directo a productos
+  switchAdminTab('productos');
 }
 
 let ADMIN_TAB='carritos';
@@ -1287,8 +1305,8 @@ function renderProdAdmin(prods){
   const grid=document.getElementById('prod-admin-grid');
   document.getElementById('productos-count').textContent=`${prods.length} productos`;
   if(!prods.length){grid.innerHTML='<div class="admin-empty">No se encontraron productos</div>';return;}
-  grid.innerHTML=prods.map((p,idx)=>{
-    const fotos=[p.foto1,p.foto2,p.foto3];
+  grid.innerHTML=prods.map((p)=>{
+    const fotos=[p.foto1,p.foto2,p.foto3,p.foto4,p.foto5,p.foto6];
     const slotsHtml=fotos.map((f,i)=>`
       <div class="foto-slot-wrap">
         ${f
@@ -1301,16 +1319,28 @@ function renderProdAdmin(prods){
     const imgHtml=fotos[0]
       ?`<img class="prod-admin-img" src="${fotos[0]}" alt="${p.nombre}">`
       :`<div class="prod-admin-img-ph">📦</div>`;
+    const idSafe=p.sku.replace(/[^a-z0-9]/gi,'_');
     return `
-      <div class="prod-admin-card" id="padmin-${p.sku.replace(/[^a-z0-9]/gi,'_')}">
+      <div class="prod-admin-card" id="padmin-${idSafe}">
         ${imgHtml}
-        <div class="prod-admin-info">
+        <div class="prod-admin-info" style="flex:1;min-width:0">
           <div class="prod-admin-nombre">${p.nombre}</div>
           <div class="prod-admin-sku">SKU: ${p.sku} · Stock: ${p.stock}</div>
           <div class="prod-admin-fotos" style="margin-top:8px">${slotsHtml}</div>
-          <div class="upload-progress" id="prog-${p.sku.replace(/[^a-z0-9]/gi,'_')}">
-            <div class="upload-bar"><div class="upload-bar-fill" id="bar-${p.sku.replace(/[^a-z0-9]/gi,'_')}"></div></div>
-            <span id="prog-label-${p.sku.replace(/[^a-z0-9]/gi,'_')}">Subiendo...</span>
+          <div class="upload-progress" id="prog-${idSafe}">
+            <div class="upload-bar"><div class="upload-bar-fill" id="bar-${idSafe}"></div></div>
+            <span id="prog-label-${idSafe}">Subiendo...</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap">
+            <input type="text" id="video-${idSafe}"
+              placeholder="🎬 URL YouTube (opcional)"
+              value="${p.video||''}"
+              style="flex:1;min-width:180px;padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-family:var(--font-body);background:var(--surface);color:var(--ink);outline:none;"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+            <button onclick="guardarVideoAdmin('${p.sku}')"
+              style="background:var(--accent2);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-head);white-space:nowrap">
+              💾 Guardar video
+            </button>
           </div>
         </div>
       </div>`;
@@ -1343,12 +1373,9 @@ function subirFotoAdmin(sku, slot){
       if(data.secure_url){
         bar.style.width='100%';
         label.textContent='Guardando...';
-        // Guardar URL en Google Sheets
         await call('updateFotoProducto',{sku, slot, url:data.secure_url});
-        // Actualizar en memoria
         const prod=ALL_PRODS_ADMIN.find(x=>x.sku===sku);
         if(prod) prod['foto'+slot]=data.secure_url;
-        // También actualizar ALL_PRODS
         const prodCat=ALL_PRODS.find(x=>x.sku===sku);
         if(prodCat) prodCat['foto'+slot]=data.secure_url;
         toast(`✓ Foto ${slot} actualizada`,'success');
@@ -1378,6 +1405,21 @@ async function eliminarFotoAdmin(sku, slot, url){
     renderProdAdmin(ALL_PRODS_ADMIN);
   } catch(err){
     toast('Error al eliminar foto','error');
+  }
+}
+
+async function guardarVideoAdmin(sku){
+  const idSafe=sku.replace(/[^a-z0-9]/gi,'_');
+  const url=document.getElementById('video-'+idSafe)?.value.trim()||'';
+  try{
+    await call('updateVideoProducto',{sku, url});
+    const prod=ALL_PRODS_ADMIN.find(x=>x.sku===sku);
+    if(prod) prod.video=url;
+    const prodCat=ALL_PRODS.find(x=>x.sku===sku);
+    if(prodCat) prodCat.video=url;
+    toast('✓ Video guardado','success');
+  } catch(err){
+    toast('Error al guardar video','error');
   }
 }
 
