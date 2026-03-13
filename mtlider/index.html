@@ -219,6 +219,30 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--ink);transiti
 .btn-cancelar-cliente{padding:13px 18px;background:transparent;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;cursor:pointer;color:var(--ink3);font-family:var(--font-body)}
 .form-error{color:var(--red);font-size:12px;margin-top:4px;min-height:16px}
 
+/* CLOUDINARY UPLOADER */
+.prod-admin-grid{display:flex;flex-direction:column;gap:14px}
+.prod-admin-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.prod-admin-img{width:64px;height:64px;object-fit:cover;border-radius:10px;background:var(--surface2);flex-shrink:0;border:1px solid var(--border)}
+.prod-admin-img-ph{width:64px;height:64px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;border:1px solid var(--border)}
+.prod-admin-info{flex:1;min-width:0}
+.prod-admin-nombre{font-family:var(--font-head);font-size:14px;font-weight:800;color:var(--ink);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prod-admin-sku{font-size:11px;color:var(--ink3);letter-spacing:.5px}
+.prod-admin-fotos{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.prod-admin-foto-thumb{width:44px;height:44px;object-fit:cover;border-radius:7px;border:1.5px solid var(--border);cursor:pointer;transition:border-color .2s}
+.prod-admin-foto-thumb:hover{border-color:var(--red)}
+.prod-admin-foto-empty{width:44px;height:44px;border-radius:7px;border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;transition:border-color .2s;background:var(--surface2);color:var(--ink3)}
+.prod-admin-foto-empty:hover{border-color:var(--accent);color:var(--accent)}
+.upload-progress{display:none;align-items:center;gap:8px;font-size:12px;color:var(--ink3);margin-top:6px}
+.upload-progress.show{display:flex}
+.upload-bar{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.upload-bar-fill{height:100%;background:var(--accent);border-radius:2px;width:0%;transition:width .3s}
+.prod-admin-search{width:100%;padding:11px 18px;border:1.5px solid var(--border);border-radius:40px;font-size:14px;font-family:var(--font-body);background:var(--surface);color:var(--ink);outline:none;margin-bottom:16px;transition:border .2s}
+.prod-admin-search:focus{border-color:var(--accent)}
+.foto-slot-label{font-size:10px;color:var(--ink3);text-align:center;margin-top:2px;font-family:var(--font-head)}
+.foto-slot-wrap{display:flex;flex-direction:column;align-items:center;gap:2px}
+.btn-del-foto{width:44px;background:rgba(229,57,53,.12);border:none;border-radius:0 0 7px 7px;font-size:11px;color:var(--red);cursor:pointer;padding:2px;display:none}
+.foto-slot-wrap:hover .btn-del-foto{display:block}
+
 .bienvenida-overlay{display:none;position:fixed;inset:0;z-index:5000;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:24px;animation:fadeIn .4s ease}
 .bienvenida-overlay.open{display:flex}
 .bienvenida-box{background:var(--surface);border-radius:24px;padding:36px 28px;width:100%;max-width:420px;text-align:center;box-shadow:var(--shadow-lg);animation:slideUp .4s ease}
@@ -375,6 +399,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--ink);transiti
     <div class="admin-tabs">
       <button class="admin-tab active" id="tab-carritos" onclick="switchAdminTab('carritos')">🛒 Carritos activos</button>
       <button class="admin-tab" id="tab-clientes" onclick="switchAdminTab('clientes')">👥 Clientes</button>
+      <button class="admin-tab" id="tab-productos" onclick="switchAdminTab('productos')">📦 Productos</button>
     </div>
 
     <!-- TAB CARRITOS -->
@@ -394,6 +419,17 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--ink);transiti
       </div>
       <div class="admin-loading" id="clientes-loading"><div class="spinner"></div> Cargando clientes...</div>
       <div class="clientes-grid" id="clientes-grid"></div>
+    </div>
+
+    <!-- TAB PRODUCTOS (CLOUDINARY) -->
+    <div class="admin-tab-content" id="content-productos">
+      <div class="clientes-header">
+        <span class="admin-count" id="productos-count"></span>
+        <span style="font-size:12px;color:var(--ink3)">☁️ Fotos en Cloudinary</span>
+      </div>
+      <input type="text" class="prod-admin-search" id="prod-admin-search" placeholder="🔍 Buscar producto o SKU..." oninput="filtrarProductosAdmin(this.value)">
+      <div class="admin-loading" id="productos-loading" style="display:none;align-items:center;justify-content:center;padding:40px;gap:12px;color:var(--ink3);font-size:14px"><div class="spinner"></div> Cargando productos...</div>
+      <div class="prod-admin-grid" id="prod-admin-grid"></div>
     </div>
   </div>
 </div>
@@ -487,7 +523,9 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--ink);transiti
 </div>
 
 <script>
-const API='https://script.google.com/macros/s/AKfycbxwF_01_IgoxuxCzYTYcoELeE8rVPOZS4Di5TZSEX4hqpMpFDzrk4DfKoF8VFKR_aTH/exec';
+const API='https://script.google.com/macros/s/AKfycbyI1PDNS8PURSMbrAHv3EbMJ5K0rOC2XxBH8-mMW3dT5Pr8X2EVCz8bhhz-QqKKs7Lh/exec';
+const CLOUDINARY_CLOUD='duh7kxf7z';
+const CLOUDINARY_PRESET='catalogo_mtlider';
 
 let SESSION=null,CONFIG={},ALL_PRODS=[],ALL_CATS=[],ALL_VARIANTES=[],CARRITO=[],CAT='todas',Q='',DARK=false;
 
@@ -659,12 +697,14 @@ function switchAdminTab(tab){
   document.getElementById('tab-'+tab).classList.add('active');
   document.getElementById('content-'+tab).classList.add('active');
   if(tab==='carritos') cargarCarritosAdmin();
-  else cargarClientesAdmin();
+  else if(tab==='clientes') cargarClientesAdmin();
+  else if(tab==='productos') cargarProductosAdmin();
 }
 
 function recargarAdminTab(){
   if(ADMIN_TAB==='carritos') cargarCarritosAdmin();
-  else cargarClientesAdmin();
+  else if(ADMIN_TAB==='clientes') cargarClientesAdmin();
+  else if(ADMIN_TAB==='productos') cargarProductosAdmin();
 }
 
 async function cargarCarritosAdmin(){
@@ -1232,6 +1272,132 @@ function toast(msg,type=''){
   el.className='toast '+type;el.textContent=msg;
   document.getElementById('toast-wrap').appendChild(el);
   setTimeout(()=>el.remove(),2800);
+}
+
+// ── CLOUDINARY PRODUCTOS ──────────────────────────────────────────────────────
+let ALL_PRODS_ADMIN=[];
+
+function filtrarProductosAdmin(q){
+  const term=q.toLowerCase().trim();
+  const filtrados=term?ALL_PRODS_ADMIN.filter(p=>p.nombre.toLowerCase().includes(term)||p.sku.toLowerCase().includes(term)):ALL_PRODS_ADMIN;
+  renderProdAdmin(filtrados);
+}
+
+function renderProdAdmin(prods){
+  const grid=document.getElementById('prod-admin-grid');
+  document.getElementById('productos-count').textContent=`${prods.length} productos`;
+  if(!prods.length){grid.innerHTML='<div class="admin-empty">No se encontraron productos</div>';return;}
+  grid.innerHTML=prods.map((p,idx)=>{
+    const fotos=[p.foto1,p.foto2,p.foto3];
+    const slotsHtml=fotos.map((f,i)=>`
+      <div class="foto-slot-wrap">
+        ${f
+          ?`<img class="prod-admin-foto-thumb" src="${f}" title="Foto ${i+1}" onclick="eliminarFotoAdmin('${p.sku}',${i+1},'${f}')">
+             <button class="btn-del-foto" onclick="eliminarFotoAdmin('${p.sku}',${i+1},'${f}')">🗑</button>`
+          :`<div class="prod-admin-foto-empty" onclick="subirFotoAdmin('${p.sku}',${i+1})" title="Subir foto ${i+1}">+</div>`
+        }
+        <div class="foto-slot-label">F${i+1}</div>
+      </div>`).join('');
+    const imgHtml=fotos[0]
+      ?`<img class="prod-admin-img" src="${fotos[0]}" alt="${p.nombre}">`
+      :`<div class="prod-admin-img-ph">📦</div>`;
+    return `
+      <div class="prod-admin-card" id="padmin-${p.sku.replace(/[^a-z0-9]/gi,'_')}">
+        ${imgHtml}
+        <div class="prod-admin-info">
+          <div class="prod-admin-nombre">${p.nombre}</div>
+          <div class="prod-admin-sku">SKU: ${p.sku} · Stock: ${p.stock}</div>
+          <div class="prod-admin-fotos" style="margin-top:8px">${slotsHtml}</div>
+          <div class="upload-progress" id="prog-${p.sku.replace(/[^a-z0-9]/gi,'_')}">
+            <div class="upload-bar"><div class="upload-bar-fill" id="bar-${p.sku.replace(/[^a-z0-9]/gi,'_')}"></div></div>
+            <span id="prog-label-${p.sku.replace(/[^a-z0-9]/gi,'_')}">Subiendo...</span>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function subirFotoAdmin(sku, slot){
+  const input=document.createElement('input');
+  input.type='file';
+  input.accept='image/*';
+  input.onchange=async(e)=>{
+    const file=e.target.files[0];
+    if(!file)return;
+    const id=sku.replace(/[^a-z0-9]/gi,'_');
+    const prog=document.getElementById('prog-'+id);
+    const bar=document.getElementById('bar-'+id);
+    const label=document.getElementById('prog-label-'+id);
+    prog.classList.add('show');
+    bar.style.width='20%';
+    label.textContent='Subiendo...';
+    try{
+      const fd=new FormData();
+      fd.append('file',file);
+      fd.append('upload_preset',CLOUDINARY_PRESET);
+      fd.append('folder','mtlider');
+      bar.style.width='50%';
+      const res=await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`,{method:'POST',body:fd});
+      bar.style.width='80%';
+      const data=await res.json();
+      if(data.secure_url){
+        bar.style.width='100%';
+        label.textContent='Guardando...';
+        // Guardar URL en Google Sheets
+        await call('updateFotoProducto',{sku, slot, url:data.secure_url});
+        // Actualizar en memoria
+        const prod=ALL_PRODS_ADMIN.find(x=>x.sku===sku);
+        if(prod) prod['foto'+slot]=data.secure_url;
+        // También actualizar ALL_PRODS
+        const prodCat=ALL_PRODS.find(x=>x.sku===sku);
+        if(prodCat) prodCat['foto'+slot]=data.secure_url;
+        toast(`✓ Foto ${slot} actualizada`,'success');
+        renderProdAdmin(ALL_PRODS_ADMIN);
+      } else {
+        toast('Error al subir foto','error');
+      }
+    } catch(err){
+      toast('Error de conexión','error');
+      console.error(err);
+    } finally {
+      setTimeout(()=>{prog.classList.remove('show');bar.style.width='0%';},1000);
+    }
+  };
+  input.click();
+}
+
+async function eliminarFotoAdmin(sku, slot, url){
+  if(!confirm(`¿Eliminar la foto ${slot} de este producto?`))return;
+  try{
+    await call('updateFotoProducto',{sku, slot, url:''});
+    const prod=ALL_PRODS_ADMIN.find(x=>x.sku===sku);
+    if(prod) prod['foto'+slot]='';
+    const prodCat=ALL_PRODS.find(x=>x.sku===sku);
+    if(prodCat) prodCat['foto'+slot]='';
+    toast(`✓ Foto ${slot} eliminada`,'success');
+    renderProdAdmin(ALL_PRODS_ADMIN);
+  } catch(err){
+    toast('Error al eliminar foto','error');
+  }
+}
+
+async function cargarProductosAdmin(){
+  document.getElementById('productos-loading').style.display='flex';
+  document.getElementById('prod-admin-grid').innerHTML='';
+  try{
+    // Reutilizar datos ya cargados si existen
+    if(ALL_PRODS.length){
+      ALL_PRODS_ADMIN=[...ALL_PRODS];
+    } else {
+      const r=await call('getProductos',{});
+      ALL_PRODS_ADMIN=r.productos||[];
+    }
+    renderProdAdmin(ALL_PRODS_ADMIN);
+  } catch(err){
+    document.getElementById('prod-admin-grid').innerHTML='<div class="admin-empty">Error al cargar productos</div>';
+  } finally {
+    document.getElementById('productos-loading').style.display='none';
+  }
 }
 
 init();
