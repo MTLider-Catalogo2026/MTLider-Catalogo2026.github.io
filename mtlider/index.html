@@ -61,6 +61,22 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--ink);transiti
 .cart-badge{position:absolute;top:-4px;right:-4px;background:var(--accent);color:#fff;width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:700;display:none;align-items:center;justify-content:center;font-family:var(--font-head)}
 .cart-badge.show{display:flex}
 @media(max-width:420px){.topbar-user{display:none}.topbar-lista{display:none}}
+/* Boton obtén tu catálogo */
+.btn-promo-cat{background:linear-gradient(135deg,var(--naranja,#F26522),#e55a1a);color:#fff;border:none;border-radius:20px;padding:5px 12px;font-size:10px;font-weight:700;cursor:pointer;font-family:var(--font-head);white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:opacity .2s;flex-shrink:0}
+.btn-promo-cat:hover{opacity:.85}
+@media(max-width:380px){.btn-promo-cat{display:none}}
+/* Panel pedidos vendedor */
+.pedidos-grid{display:flex;flex-direction:column;gap:12px}
+.pedido-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px}
+.pedido-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;flex-wrap:wrap;gap:6px}
+.pedido-cliente{font-family:var(--font-head);font-size:14px;font-weight:800;color:var(--ink)}
+.pedido-fecha{font-size:11px;color:var(--ink3)}
+.pedido-total{font-family:var(--font-head);font-size:18px;font-weight:900;color:var(--accent)}
+.pedido-items{font-size:12px;color:var(--ink2);margin-bottom:10px;line-height:1.6}
+.pedido-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn-dl-pedido{background:linear-gradient(135deg,#1d6f42,#2e7d52);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-head);display:flex;align-items:center;gap:5px}
+.btn-del-pedido{background:transparent;border:1.5px solid var(--border);color:var(--ink3);border-radius:8px;padding:7px 12px;font-size:12px;cursor:pointer;font-family:var(--font-body);transition:all .2s}
+.btn-del-pedido:hover{border-color:var(--red);color:var(--red)}
 /* CONTENT */
 .app-content{flex:1;padding:24px 20px;max-width:1280px;margin:0 auto;width:100%}
 .search-wrap{position:relative;margin-bottom:20px}
@@ -349,6 +365,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--ink);transiti
       <span class="topbar-user" id="tb-user"></span>
       <span class="topbar-lista" id="tb-lista"></span>
       <button class="btn-icon" id="dark-btn" onclick="toggleDark()">🌙</button>
+      <a class="btn-promo-cat" href="https://catalogosdigitales.mx" target="_blank">🛍️ Quiero mi catálogo</a>
       <button class="btn-icon" id="cart-btn" onclick="abrirCarrito()">🛒<span class="cart-badge" id="cart-badge">0</span></button>
       <button class="btn-icon" onclick="doLogout()">↩</button>
     </div>
@@ -427,6 +444,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--ink);transiti
       <button class="admin-tab active" id="tab-carritos" onclick="switchAdminTab('carritos')">🛒 Carritos activos</button>
       <button class="admin-tab" id="tab-clientes" onclick="switchAdminTab('clientes')">👥 Clientes</button>
       <button class="admin-tab" id="tab-productos" onclick="switchAdminTab('productos')">📦 Productos</button>
+      <button class="admin-tab" id="tab-pedidos" onclick="switchAdminTab('pedidos')">📋 Pedidos</button>
     </div>
 
     <!-- TAB CARRITOS -->
@@ -457,6 +475,16 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--ink);transiti
       <input type="text" class="prod-admin-search" id="prod-admin-search" placeholder="🔍 Buscar producto o SKU..." oninput="filtrarProductosAdmin(this.value)">
       <div class="admin-loading" id="productos-loading" style="display:none;align-items:center;justify-content:center;padding:40px;gap:12px;color:var(--ink3);font-size:14px"><div class="spinner"></div> Cargando productos...</div>
       <div class="prod-admin-grid" id="prod-admin-grid"></div>
+    </div>
+
+    <!-- TAB PEDIDOS -->
+    <div class="admin-tab-content" id="content-pedidos">
+      <div class="clientes-header">
+        <span class="admin-count" id="pedidos-count"></span>
+        <span style="font-size:12px;color:var(--ink3)">📋 Pedidos enviados por WhatsApp</span>
+      </div>
+      <div class="admin-loading" id="pedidos-loading" style="display:none;align-items:center;justify-content:center;padding:40px;gap:12px;color:var(--ink3);font-size:14px"><div class="spinner"></div> Cargando pedidos...</div>
+      <div class="pedidos-grid" id="pedidos-grid"></div>
     </div>
   </div>
 </div>
@@ -589,20 +617,20 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--ink);transiti
     <div class="confirm-title">Confirmar pedido</div>
     <div class="confirm-desc">Para completar tu pedido realiza estos 2 pasos:</div>
     <div style="text-align:left;background:var(--surface2);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:20px;font-size:13px;color:var(--ink2);line-height:1.8">
-      <div>1️⃣ Descarga el Excel con el detalle</div>
-      <div>2️⃣ Envía el pedido por WhatsApp</div>
-      <div style="margin-top:8px;font-size:12px;color:var(--ink3)">📎 Adjunta el Excel en el chat de WhatsApp</div>
+      <div>1️⃣ Envía el pedido por WhatsApp</div>
+      <div>2️⃣ Tu vendedor recibirá el detalle completo</div>
+      <div style="margin-top:8px;font-size:12px;color:var(--ink3)">📊 El pedido queda registrado automáticamente</div>
     </div>
     <div class="confirm-btns">
-      <button class="btn-excel" style="margin-top:0" onclick="descargarExcel()">📥 Paso 1 — Descargar Excel</button>
-      <button class="btn-confirm-wa" onclick="confirmarEnvio()">💬 Paso 2 — Enviar por WhatsApp</button>
+      <button class="btn-confirm-wa" onclick="confirmarEnvio()">💬 Enviar pedido por WhatsApp</button>
+      <button class="btn-excel" style="margin-top:0" onclick="descargarExcel()">📥 Descargar Excel (opcional)</button>
       <button class="btn-confirm-cancel" onclick="document.getElementById('confirm-overlay').classList.remove('open')">Cancelar</button>
     </div>
   </div>
 </div>
 
 <script>
-const API='https://script.google.com/macros/s/AKfycbyLRa8G5V0Q9hJR9oLQiztAe6R7ft5xEHVUVJ7WH3SVArdfRfZjyuMfOjfOqOyUBJU/exec';
+const API='https://script.google.com/macros/s/AKfycbwSV1xVkycsuI-5M6_5cNcU5rukyXUsLrI7Sr96uRE9WaCsB35yE7ZSwdBrX63Jc9Uo/exec';
 const CLOUDINARY_CLOUD='duh7kxf7z';
 const CLOUDINARY_PRESET='catalogo_mtlider';
 
@@ -794,6 +822,7 @@ async function mostrarAdmin(){
   document.getElementById('admin-user').textContent='👤 '+SESSION.nombre+(esVendedor?' — Vendedor':'');
   document.getElementById('tab-clientes').style.display=esVendedor?'none':'';
   document.getElementById('tab-productos').style.display=esVendedor?'none':'';
+  document.getElementById('tab-pedidos').style.display='';
   await cargarCarritosAdmin();
 }
 
@@ -820,12 +849,14 @@ function switchAdminTab(tab){
   if(tab==='carritos') cargarCarritosAdmin();
   else if(tab==='clientes') cargarClientesAdmin();
   else if(tab==='productos') cargarProductosAdmin();
+  else if(tab==='pedidos') cargarPedidosAdmin();
 }
 
 function recargarAdminTab(){
   if(ADMIN_TAB==='carritos') cargarCarritosAdmin();
   else if(ADMIN_TAB==='clientes') cargarClientesAdmin();
   else if(ADMIN_TAB==='productos') cargarProductosAdmin();
+  else if(ADMIN_TAB==='pedidos') cargarPedidosAdmin();
 }
 
 async function cargarCarritosAdmin(){
@@ -1031,7 +1062,22 @@ function limpiarSearch(){document.getElementById('search-input').value='';Q='';d
 function renderGrid(){
   let prods=[...ALL_PRODS];
   if(CAT!=='todas') prods=prods.filter(p=>p.categoria===CAT);
-  if(Q) prods=prods.filter(p=>p.nombre.toLowerCase().includes(Q)||p.sku.toLowerCase().includes(Q)||(p.descripcion||'').toLowerCase().includes(Q)||(p.categoria||'').toLowerCase().includes(Q));
+  if(Q){
+    prods=prods.filter(p=>{
+      // Buscar en campos del producto
+      const enProd=p.nombre.toLowerCase().includes(Q)||
+        p.sku.toLowerCase().includes(Q)||
+        (p.descripcion||'').toLowerCase().includes(Q)||
+        (p.categoria||'').toLowerCase().includes(Q);
+      if(enProd) return true;
+      // Buscar dentro de las variantes del producto
+      const variantes=ALL_VARIANTES.filter(v=>v.sku_producto===p.sku);
+      return variantes.some(v=>
+        v.modelo.toLowerCase().includes(Q)||
+        (v.sku_modelo||'').toLowerCase().includes(Q)
+      );
+    });
+  }
   const grid=document.getElementById('prod-grid');
   if(!prods.length){grid.innerHTML=`<div class="empty-state"><div class="es-icon">🔍</div><h3>Sin resultados</h3><p>Intenta con otro término o categoría</p></div>`;return;}
   grid.innerHTML=prods.map(p=>buildCard(p)).join('');
@@ -1390,7 +1436,21 @@ function sendWA(){
   msg+=`📅 ${new Date().toLocaleString('es-MX')}`;
   const num=(SESSION?.wa||CONFIG.negocio_whatsapp||'').replace(/\D/g,'');
   window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`,'_blank');
-  // Limpiar carrito después de enviar
+  // Guardar pedido en Sheets (contabilidad)
+  if(SESSION?.usuario && SESSION.usuario!=='invitado'){
+    const itemsStr=CARRITO.map(it=>`${it.nombre} x${it.qty} @${fmt(it.precio)}`).join(' | ');
+    call('guardarPedido',{
+      usuario: SESSION.usuario,
+      nombre: SESSION.nombre||'',
+      empresa: SESSION.empresa||'',
+      lista,
+      total: total.toFixed(2),
+      moneda,
+      items: itemsStr,
+      fecha: new Date().toLocaleString('es-MX'),
+      vendedor: SESSION.vendedor_nombre||''
+    }).catch(()=>{});
+  }
   setTimeout(()=>clearCart(),1000);
 }
 
@@ -1630,6 +1690,71 @@ function enviarRegistro(){
   window.open(`https://wa.me/523338493961?text=${encodeURIComponent(msg)}`,'_blank');
   cerrarRegistro();
   toast('✓ Solicitud enviada, pronto te contactamos','success');
+}
+
+// ── PEDIDOS ADMIN ─────────────────────────────────────────────────────────────
+async function cargarPedidosAdmin(){
+  document.getElementById('pedidos-loading').style.display='flex';
+  document.getElementById('pedidos-grid').innerHTML='';
+  document.getElementById('pedidos-count').textContent='';
+  try{
+    const params=SESSION.rol==='vendedor'?{vendedor:SESSION.vendedor_nombre}:{};
+    const r=await call('getPedidos', params);
+    document.getElementById('pedidos-loading').style.display='none';
+    if(!r.ok||!r.pedidos||!r.pedidos.length){
+      document.getElementById('pedidos-grid').innerHTML='<div class="admin-empty">📭 No hay pedidos registrados aún</div>';
+      document.getElementById('pedidos-count').textContent='0 pedidos';
+      return;
+    }
+    document.getElementById('pedidos-count').textContent=`${r.pedidos.length} pedidos`;
+    document.getElementById('pedidos-grid').innerHTML=r.pedidos.map(p=>`
+      <div class="pedido-card">
+        <div class="pedido-card-header">
+          <div>
+            <div class="pedido-cliente">${p.nombre}${p.empresa?' ('+p.empresa+')':''}</div>
+            <div class="pedido-fecha">📅 ${p.fecha} · 📋 ${p.lista}${p.vendedor?' · 🧑‍💼 '+p.vendedor:''}</div>
+          </div>
+          <div class="pedido-total">${fmt2(parseFloat(p.total))} ${p.moneda||'MXN'}</div>
+        </div>
+        <div class="pedido-items">${p.items}</div>
+        <div class="pedido-actions">
+          <button class="btn-dl-pedido" onclick="descargarPedido(${JSON.stringify(p).replace(/"/g,'&quot;')})">📥 Descargar Excel</button>
+          <button class="btn-del-pedido" onclick="eliminarPedido('${p.fila}')">🗑 Eliminar</button>
+        </div>
+      </div>`).join('');
+  }catch(e){
+    document.getElementById('pedidos-loading').style.display='none';
+    document.getElementById('pedidos-grid').innerHTML='<div class="admin-empty">Error al cargar pedidos</div>';
+  }
+}
+
+function descargarPedido(p){
+  let csv='SEP=,\n';
+  csv+=`Pedido\n`;
+  csv+=`Cliente:,${p.nombre}${p.empresa?' ('+p.empresa+')':''}\n`;
+  csv+=`Lista:,${p.lista}\n`;
+  csv+=`Fecha:,${p.fecha}\n`;
+  csv+=`Vendedor:,${p.vendedor||''}\n\n`;
+  csv+=`Detalle:,"${p.items}"\n\n`;
+  csv+=`TOTAL:,${p.total} ${p.moneda||'MXN'}\n`;
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`Pedido_${p.nombre.replace(/\s/g,'_')}_${p.fecha.replace(/[/:, ]/g,'-')}.csv`;
+  a.click();URL.revokeObjectURL(url);
+  toast('✓ Excel descargado','success');
+}
+
+async function eliminarPedido(fila){
+  if(!confirm('¿Eliminar este pedido del registro?')) return;
+  try{
+    await call('eliminarPedido',{fila});
+    toast('✓ Pedido eliminado','success');
+    cargarPedidosAdmin();
+  }catch(e){
+    toast('Error al eliminar','error');
+  }
 }
 
 init();
