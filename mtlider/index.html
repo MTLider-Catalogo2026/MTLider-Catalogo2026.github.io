@@ -1438,7 +1438,11 @@ function sendWA(){
   window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`,'_blank');
   // Guardar pedido en Sheets (contabilidad)
   if(SESSION?.usuario && SESSION.usuario!=='invitado'){
-    const itemsStr=CARRITO.map(it=>`${it.nombre} x${it.qty} @$${it.precio.toFixed(2)}`).join(' | ');
+    const itemsStr=CARRITO.map(it=>{
+      const skuCat=it.sku_cat||it.sku.split('/')[0]||'';
+      const skuMod=it.sku_modelo||'';
+      return `${skuCat}|${skuMod}|${it.nombre}|${it.qty}|${it.precio.toFixed(2)}`;
+    }).join(';;');
     call('guardarPedido',{
       usuario: SESSION.usuario,
       nombre: SESSION.nombre||'',
@@ -1729,19 +1733,21 @@ async function cargarPedidosAdmin(){
 }
 
 function descargarPedido(p){
-  // Reconstruir filas de items desde el string guardado
-  // Formato guardado: "Nombre x3 @$45.00 | Nombre2 x1 @$120.00"
-  const itemLines = p.items.split(' | ').map(line => {
-    const m = line.match(/^(.+) x(\d+) @\$?([\d.]+)$/);
-    if(m){
-      const nombre = m[1];
-      const qty    = parseInt(m[2]);
-      const precio = parseFloat(m[3]);
-      return `,-,"${nombre}",${qty},${precio.toFixed(2)},${(precio*qty).toFixed(2)}`;
+  const lineas = p.items.split(';;').map(line => {
+    const parts = line.split('|');
+    // formato: skuCat|skuMod|nombre|qty|precio
+    if(parts.length >= 5){
+      const skuCat = parts[0] || '';
+      const skuMod = parts[1] || '';
+      const nombre = parts[2] || '';
+      const qty    = parseInt(parts[3]) || 0;
+      const precio = parseFloat(parts[4]) || 0;
+      return `${skuCat},${skuMod},"${nombre}",${qty},${precio.toFixed(2)},${(precio*qty).toFixed(2)}`;
     }
     return `,-,"${line}",-,-,-`;
   }).join('\n');
 
+  const total = parseFloat(p.total) || 0;
   let csv='SEP=,\n';
   csv+=`Pedido MTLider,,,,,\n`;
   csv+=`Cliente:,${p.nombre}${p.empresa?' ('+p.empresa+')':''},,,,\n`;
@@ -1749,10 +1755,10 @@ function descargarPedido(p){
   csv+=`Fecha:,${p.fecha},,,,\n`;
   csv+=`,,,,,\n`;
   csv+=`SKU Categoria,SKU Modelo,Nombre,Cantidad,Precio Unitario,Subtotal\n`;
-  csv+=`${itemLines}\n`;
+  csv+=`${lineas}\n`;
   csv+=`,,,,,\n`;
   csv+=`,,,,,\n`;
-  csv+=`TOTAL:,,,,,${parseFloat(p.total).toFixed(2)}\n`;
+  csv+=`TOTAL:,,,,,${total.toFixed(2)}\n`;
 
   const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
   const url=URL.createObjectURL(blob);
