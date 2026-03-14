@@ -108,9 +108,11 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--ink);transiti
 /* MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:16px}
 .modal-overlay.open{display:flex}
-.modal{background:var(--surface);border-radius:20px;width:100%;max-width:700px;max-height:92vh;overflow-y:auto;box-shadow:var(--shadow-lg);animation:slideUp .3s ease;position:relative}
+.modal{background:var(--surface);border-radius:20px;width:100%;max-width:700px;max-height:92vh;overflow:hidden;box-shadow:var(--shadow-lg);animation:slideUp .3s ease;position:relative;display:flex;flex-direction:column}
 @keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
 @media(max-width:480px){.modal{border-radius:20px 20px 0 0;position:fixed;bottom:0;left:0;right:0;max-height:90vh;margin:0}.modal-overlay{align-items:flex-end;padding:0}}
+.modal-scroll{overflow-y:auto;flex:1}
+.modal-footer{padding:14px 24px;border-top:1px solid var(--border);background:var(--surface);flex-shrink:0;}
 .modal-imgs{position:relative;background:var(--surface2);border-radius:20px 20px 0 0;overflow:hidden}
 .modal-img-main{width:100%;aspect-ratio:1/1;object-fit:contain;display:block;background:var(--surface2);cursor:zoom-in;transition:transform .3s}
 .modal-img-main.zoomed{cursor:zoom-out;transform:scale(1.8);transform-origin:var(--zoom-x,50%) var(--zoom-y,50%)}
@@ -367,6 +369,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--ink);transiti
   <div class="modal" id="modal">
     <div id="modal-imgs" class="modal-imgs"></div>
     <div id="modal-body" class="modal-body"></div>
+    <div id="modal-footer" class="modal-footer" style="display:none"></div>
   </div>
 </div>
 
@@ -599,7 +602,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--ink);transiti
 </div>
 
 <script>
-const API='https://script.google.com/macros/s/AKfycbx5CrfCeeYeMsipQ3fOD3aJayiMxxcJGpaPVt80SrQe2bUTJlZbIp4lK-K1Fv168uvm/exec';
+const API='https://script.google.com/macros/s/AKfycbyLRa8G5V0Q9hJR9oLQiztAe6R7ft5xEHVUVJ7WH3SVArdfRfZjyuMfOjfOqOyUBJU/exec';
 const CLOUDINARY_CLOUD='duh7kxf7z';
 const CLOUDINARY_PRESET='catalogo_mtlider';
 
@@ -698,10 +701,11 @@ async function doLogin(){
   const p=document.getElementById('login-pass').value;
   if(!u||!p){setErr('Completa usuario y contraseña');return;}
   document.getElementById('loading').classList.add('show');
-  const r=await call('login',{usuario:u,password:p});
+  const token=Date.now().toString(36)+'_'+Math.random().toString(36).slice(2);
+  const r=await call('login',{usuario:u,password:p,token});
   document.getElementById('loading').classList.remove('show');
   if(r.ok){
-    SESSION={nombre:r.nombre,empresa:r.empresa,lista:r.lista,wa:r.whatsapp_vendedor,usuario:u,rol:r.rol||'cliente',vendedor_nombre:r.vendedor_nombre||''};
+    SESSION={nombre:r.nombre,empresa:r.empresa,lista:r.lista,wa:r.whatsapp_vendedor,usuario:u,rol:r.rol||'cliente',vendedor_nombre:r.vendedor_nombre||'',token};
     localStorage.setItem('cat_session',JSON.stringify(SESSION));
     if(SESSION.rol==='admin'){
       mostrarAdmin();
@@ -713,8 +717,31 @@ async function doLogin(){
       mostrarBienvenida();
       mostrarApp();
       cargarCarritoGuardado();
+      // Verificar sesión cada 2 minutos
+      iniciarVerificacionSesion();
     }
   } else setErr(r.error||'Usuario o contraseña incorrectos');
+}
+
+// Verifica cada 2 min si la sesión sigue siendo válida (no fue desplazada por otro dispositivo)
+function iniciarVerificacionSesion(){
+  if(SESSION?.rol!=='cliente') return;
+  setInterval(async()=>{
+    if(!SESSION?.usuario || SESSION.usuario==='invitado') return;
+    try{
+      const r=await call('verificarToken',{usuario:SESSION.usuario,token:SESSION.token});
+      if(!r.ok){
+        // Sesión inválida — otro dispositivo inició sesión
+        SESSION=null;
+        localStorage.removeItem('cat_session');
+        document.getElementById('screen-app').classList.remove('active');
+        document.getElementById('screen-login').classList.remove('hidden');
+        document.getElementById('screen-login').classList.add('active');
+        // Mostrar aviso
+        setTimeout(()=>setErr('⚠️ Tu sesión fue iniciada en otro dispositivo'),100);
+      }
+    }catch(e){}
+  }, 120000);
 }
 
 function entrarInvitado(){
@@ -766,7 +793,7 @@ async function mostrarAdmin(){
   const esVendedor=SESSION.rol==='vendedor';
   document.getElementById('admin-user').textContent='👤 '+SESSION.nombre+(esVendedor?' — Vendedor':'');
   document.getElementById('tab-clientes').style.display=esVendedor?'none':'';
-  document.getElementById('tab-productos').style.display='';
+  document.getElementById('tab-productos').style.display=esVendedor?'none':'';
   await cargarCarritosAdmin();
 }
 
@@ -1048,12 +1075,20 @@ function openModal(sku){
     iHtml+=`<button class="modal-zoom-btn" onclick="toggleZoom()">🔍 Zoom</button>`;
     if(fotos.length>1) iHtml+=`<div class="modal-thumbnails">${fotos.map((f,i)=>`<img class="modal-thumb ${i===0?'active':''}" src="${f}" onclick="switchFoto('${f}',this)">`).join('')}</div>`;
   } else iHtml+=`<div class="modal-img-ph">📦</div>`;
+
+  // Wrap imgs + body en scroll container
+  const modal=document.getElementById('modal');
+  // Limpiar estructura anterior
+  modal.innerHTML=`
+    <div class="modal-scroll">
+      <div id="modal-imgs" class="modal-imgs"></div>
+      <div id="modal-body" class="modal-body"></div>
+    </div>
+    <div id="modal-footer" class="modal-footer" style="display:none"></div>`;
+
   document.getElementById('modal-imgs').innerHTML=iHtml;
 
-  // Etiqueta modal
   const etiqHtml=buildEtiqueta(p.etiqueta,p.stock);
-
-  // Body
   const stockTxt=agotado?'❌ Sin stock':p.stock<=5?`⚠️ Últimas ${p.stock} piezas`:`✅ Disponible (${p.stock})`;
 
   let bodyHtml=`
@@ -1066,7 +1101,6 @@ function openModal(sku){
     <div class="modal-stock">${stockTxt}</div>`;
 
   if(hasVar){
-    // Sección variantes
     const variantes=ALL_VARIANTES.filter(v=>v.sku_producto===sku);
     bodyHtml+=`
       <div class="variantes-section">
@@ -1086,9 +1120,12 @@ function openModal(sku){
             }).join('')}
           </tbody>
         </table>
-        <button class="btn-add-variantes" onclick="addVariantesModal('${sku}')">🛒 Agregar modelos seleccionados</button>
+        ${p.video?`<div style="margin-top:14px;margin-bottom:4px"><button class="btn-video-modal" onclick="playVideo('${ytId(p.video)}')">▶ Ver video</button></div>`:''}
       </div>`;
-    if(p.video) bodyHtml+=`<div style="margin-top:14px"><button class="btn-video-modal" onclick="playVideo('${ytId(p.video)}')">▶ Ver video</button></div>`;
+    // Botón estático en footer
+    const footer=document.getElementById('modal-footer');
+    footer.style.display='block';
+    footer.innerHTML=`<button class="btn-add-variantes" style="margin-top:0" onclick="addVariantesModal('${sku}')">🛒 Agregar modelos seleccionados al carrito</button>`;
   } else {
     bodyHtml+=`
       <div class="modal-actions">
@@ -1100,6 +1137,7 @@ function openModal(sku){
         <button class="btn-add-modal" ${agotado?'disabled':''} onclick="addFromModal('${p.sku}')">🛒 Agregar al carrito</button>
         ${p.video?`<button class="btn-video-modal" onclick="playVideo('${ytId(p.video)}')">▶ Ver video</button>`:''}
       </div>`;
+    document.getElementById('modal-footer').style.display='none';
   }
 
   document.getElementById('modal-body').innerHTML=bodyHtml;
