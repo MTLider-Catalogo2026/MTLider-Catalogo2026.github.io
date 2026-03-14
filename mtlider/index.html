@@ -1438,7 +1438,7 @@ function sendWA(){
   window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`,'_blank');
   // Guardar pedido en Sheets (contabilidad)
   if(SESSION?.usuario && SESSION.usuario!=='invitado'){
-    const itemsStr=CARRITO.map(it=>`${it.nombre} x${it.qty} @${fmt(it.precio)}`).join(' | ');
+    const itemsStr=CARRITO.map(it=>`${it.nombre} x${it.qty} @$${it.precio.toFixed(2)}`).join(' | ');
     call('guardarPedido',{
       usuario: SESSION.usuario,
       nombre: SESSION.nombre||'',
@@ -1729,19 +1729,36 @@ async function cargarPedidosAdmin(){
 }
 
 function descargarPedido(p){
+  // Reconstruir filas de items desde el string guardado
+  // Formato guardado: "Nombre x3 @$45.00 | Nombre2 x1 @$120.00"
+  const itemLines = p.items.split(' | ').map(line => {
+    const m = line.match(/^(.+) x(\d+) @\$?([\d.]+)$/);
+    if(m){
+      const nombre = m[1];
+      const qty    = parseInt(m[2]);
+      const precio = parseFloat(m[3]);
+      return `,-,"${nombre}",${qty},${precio.toFixed(2)},${(precio*qty).toFixed(2)}`;
+    }
+    return `,-,"${line}",-,-,-`;
+  }).join('\n');
+
   let csv='SEP=,\n';
-  csv+=`Pedido\n`;
-  csv+=`Cliente:,${p.nombre}${p.empresa?' ('+p.empresa+')':''}\n`;
-  csv+=`Lista:,${p.lista}\n`;
-  csv+=`Fecha:,${p.fecha}\n`;
-  csv+=`Vendedor:,${p.vendedor||''}\n\n`;
-  csv+=`Detalle:,"${p.items}"\n\n`;
-  csv+=`TOTAL:,${p.total} ${p.moneda||'MXN'}\n`;
+  csv+=`Pedido MTLider,,,,,\n`;
+  csv+=`Cliente:,${p.nombre}${p.empresa?' ('+p.empresa+')':''},,,,\n`;
+  csv+=`Lista:,${p.lista},,,,\n`;
+  csv+=`Fecha:,${p.fecha},,,,\n`;
+  csv+=`,,,,,\n`;
+  csv+=`SKU Categoria,SKU Modelo,Nombre,Cantidad,Precio Unitario,Subtotal\n`;
+  csv+=`${itemLines}\n`;
+  csv+=`,,,,,\n`;
+  csv+=`,,,,,\n`;
+  csv+=`TOTAL:,,,,,${parseFloat(p.total).toFixed(2)}\n`;
+
   const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;
-  a.download=`Pedido_${p.nombre.replace(/\s/g,'_')}_${p.fecha.replace(/[/:, ]/g,'-')}.csv`;
+  a.download=`Pedido_MTLider_${p.fecha.replace(/[/:, ]/g,'-').replace(/-+/g,'-')}.csv`;
   a.click();URL.revokeObjectURL(url);
   toast('✓ Excel descargado','success');
 }
