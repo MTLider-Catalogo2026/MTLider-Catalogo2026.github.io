@@ -144,6 +144,12 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--ink);transiti
 .modal-sku{font-size:11px;color:var(--ink3);font-family:var(--font-head);letter-spacing:1.5px;margin-bottom:6px}
 .modal-nombre{font-size:22px;font-weight:800;font-family:var(--font-head);margin-bottom:8px;line-height:1.2}
 .modal-desc{font-size:14px;color:var(--ink2);line-height:1.6;margin-bottom:16px}
+.modal-desc-intro{font-size:14px;color:var(--ink2);line-height:1.7;margin-bottom:12px}
+.modal-desc-section{margin-bottom:10px}
+.modal-desc-title{font-size:12px;font-weight:700;font-family:var(--font-head);color:var(--ink);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.modal-desc-bullets{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:5px}
+.modal-desc-bullets li{font-size:13px;color:var(--ink2);line-height:1.5;display:flex;align-items:flex-start;gap:8px}
+.modal-desc-bullets li::before{content:'✓';color:var(--accent);font-weight:800;font-size:12px;flex-shrink:0;margin-top:1px}
 .modal-precio{font-size:30px;font-weight:800;color:var(--accent);font-family:var(--font-head);margin-bottom:4px}
 .modal-lista-tag{font-size:12px;color:var(--ink3);margin-bottom:14px}
 .modal-stock{display:inline-flex;align-items:center;gap:6px;font-size:13px;margin-bottom:20px;padding:6px 12px;border-radius:20px;background:var(--surface2)}
@@ -1017,6 +1023,59 @@ function fmt(n){
   return(m==='MXN'?'$':m+' ')+Number(n).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
 }
 
+// ── FORMAT DESCRIPCION ────────────────────────────────────────────────────────
+function formatDesc(texto){
+  if(!texto) return '';
+  // Separar intro de características usando —— o — como divisor
+  const dividers = ['——', '—-', '---', ' — '];
+  let intro = texto;
+  let resto = '';
+  for(const div of dividers){
+    const pos = texto.indexOf(div);
+    if(pos > 0){
+      intro = texto.substring(0, pos).trim();
+      resto = texto.substring(pos + div.length).trim();
+      break;
+    }
+  }
+  // Si no hay divisor pero hay bullets •, todo es lista
+  if(!resto && texto.includes('•')){
+    intro = '';
+    resto = texto;
+  }
+  let html = '';
+  // Párrafo introductorio
+  if(intro){
+    html += `<div class="modal-desc-intro">${intro}</div>`;
+  }
+  // Sección de bullets
+  if(resto){
+    // Detectar si tiene título antes de los bullets
+    const bulletParts = resto.split('•').map(s=>s.trim()).filter(Boolean);
+    // El primer elemento podría ser el título de sección
+    let tituloSec = '';
+    let bullets = bulletParts;
+    if(bulletParts.length > 0 && !bulletParts[0].includes(' ') === false && bulletParts[0].length < 50 && !bulletParts[0].includes(',')){
+      // Probablemente es un título
+      const firstLower = bulletParts[0].toLowerCase();
+      if(firstLower.includes('característica') || firstLower.includes('caracteristica') ||
+         firstLower.includes('principal') || firstLower.includes('beneficio') ||
+         firstLower.includes('incluye') || firstLower.includes('especificac')){
+        tituloSec = bulletParts[0];
+        bullets = bulletParts.slice(1);
+      }
+    }
+    html += `<div class="modal-desc-section">`;
+    if(tituloSec) html += `<div class="modal-desc-title">${tituloSec}</div>`;
+    html += `<ul class="modal-desc-bullets">`;
+    bullets.forEach(b => {
+      if(b.trim()) html += `<li>${b.trim()}</li>`;
+    });
+    html += `</ul></div>`;
+  }
+  return html || `<div class="modal-desc-intro">${texto}</div>`;
+}
+
 // ── ETIQUETAS ─────────────────────────────────────────────────────────────────
 function buildEtiqueta(etiqueta,stock){
   // Agotado por stock o por etiqueta
@@ -1031,7 +1090,7 @@ function buildEtiqueta(etiqueta,stock){
 
 // ── CATEGORÍAS ────────────────────────────────────────────────────────────────
 function renderCats(){
-  const cats=[...new Set(ALL_PRODS.map(p=>p.categoria).filter(Boolean))];
+  const cats=[...new Set(ALL_PRODS.map(p=>(p.categoria||'').trim()).filter(Boolean))];
   const catMap={};ALL_CATS.forEach(c=>catMap[c.nombre]=c.icono||'📦');
   cats.sort((a,b)=>{
     const oa=ALL_CATS.find(x=>x.nombre===a)?.orden||99;
@@ -1040,7 +1099,7 @@ function renderCats(){
   });
   let h=`<div class="cat-chip active" id="chip-todas" onclick="setCat('todas','chip-todas')">🏷 Todos (${ALL_PRODS.length})</div>`;
   cats.forEach((c,i)=>{
-    const count=ALL_PRODS.filter(p=>p.categoria===c).length;
+    const count=ALL_PRODS.filter(p=>(p.categoria||'').trim().toLowerCase()===c.toLowerCase()).length;
     const chipId=`chip-${i}`;
     h+=`<div class="cat-chip" id="${chipId}" onclick="setCat(${JSON.stringify(c)},'${chipId}')">${catMap[c]||'📦'} ${c} (${count})</div>`;
   });
@@ -1055,13 +1114,13 @@ function setCat(cat,chipId){
 }
 
 // ── BÚSQUEDA ──────────────────────────────────────────────────────────────────
-function onSearch(v){Q=v.toLowerCase();document.getElementById('search-clear').classList.toggle('show',v.length>0);renderGrid();}
+function onSearch(v){Q=v.toLowerCase().trim();document.getElementById('search-clear').classList.toggle('show',v.length>0);renderGrid();}
 function limpiarSearch(){document.getElementById('search-input').value='';Q='';document.getElementById('search-clear').classList.remove('show');renderGrid();}
 
 // ── GRID ──────────────────────────────────────────────────────────────────────
 function renderGrid(){
   let prods=[...ALL_PRODS];
-  if(CAT!=='todas') prods=prods.filter(p=>p.categoria===CAT);
+  if(CAT!=='todas') prods=prods.filter(p=>(p.categoria||'').trim().toLowerCase()===CAT.trim().toLowerCase());
   if(Q){
     prods=prods.filter(p=>{
       // Buscar en campos del producto
@@ -1141,7 +1200,7 @@ function openModal(sku){
     ${etiqHtml?`<div style="margin-bottom:10px">${etiqHtml}</div>`:''}
     <div class="modal-sku">SKU: ${p.sku}</div>
     <div class="modal-nombre">${p.nombre}</div>
-    ${p.descripcion?`<div class="modal-desc">${p.descripcion}</div>`:''}
+    ${p.descripcion?`<div class="modal-desc">${formatDesc(p.descripcion)}</div>`:''}
     <div class="modal-precio">${fmt(precio)}</div>
     <div class="modal-lista-tag">Lista: ${SESSION?.lista||'Mayoreo'}</div>
     <div class="modal-stock">${stockTxt}</div>`;
