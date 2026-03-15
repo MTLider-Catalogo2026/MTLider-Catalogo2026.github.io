@@ -1441,8 +1441,8 @@ function sendWA(){
     const itemsStr=CARRITO.map(it=>{
       const skuCat=it.sku_cat||it.sku.split('/')[0]||'';
       const skuMod=it.sku_modelo||'';
-      return `${skuCat}|${skuMod}|${it.nombre}|${it.qty}|${it.precio.toFixed(2)}`;
-    }).join(';;');
+      return [skuCat,skuMod,it.nombre,it.qty,it.precio.toFixed(2)].join('~~~');
+    }).join('###');
     call('guardarPedido',{
       usuario: SESSION.usuario,
       nombre: SESSION.nombre||'',
@@ -1733,9 +1733,8 @@ async function cargarPedidosAdmin(){
 }
 
 function descargarPedido(p){
-  const lineas = p.items.split(';;').map(line => {
-    const parts = line.split('|');
-    // formato: skuCat|skuMod|nombre|qty|precio
+  const lineas = p.items.split('###').map(line => {
+    const parts = line.split('~~~');
     if(parts.length >= 5){
       const skuCat = parts[0] || '';
       const skuMod = parts[1] || '';
@@ -1764,7 +1763,7 @@ function descargarPedido(p){
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;
-  a.download=`Pedido_MTLider_${p.fecha.replace(/[/:, ]/g,'-').replace(/-+/g,'-')}.csv`;
+  a.download=`Pedido_MTLider_${new Date().toISOString().slice(0,10)}.csv`;
   a.click();URL.revokeObjectURL(url);
   toast('✓ Excel descargado','success');
 }
